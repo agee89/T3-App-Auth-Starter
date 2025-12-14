@@ -28,6 +28,7 @@ const formSchema = z.object({
 export function ForgotPasswordForm() {
     const { toast } = useToast();
     const [success, setSuccess] = useState(false);
+    const [notRegistered, setNotRegistered] = useState(false);
 
     const mutation = api.auth.forgotPassword.useMutation({
         onSuccess: () => {
@@ -38,12 +39,15 @@ export function ForgotPasswordForm() {
             });
         },
         onError: (error) => {
-            // For security, don't reveal if user exists, but here we just show error during dev
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Something went wrong.",
-            });
+            if (error.message === "User not found") {
+                setNotRegistered(true);
+            } else {
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: error.message || "Something went wrong.",
+                });
+            }
         },
     });
 
@@ -83,30 +87,42 @@ export function ForgotPasswordForm() {
                 <CardDescription>Enter your email to receive a password reset link</CardDescription>
             </CardHeader>
             <CardContent>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email</FormLabel>
-                                    <FormControl>
-                                        <div className="relative">
-                                            <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                                            <Input placeholder="name@example.com" className="pl-9" {...field} />
-                                        </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <Button className="w-full" type="submit" disabled={isLoading}>
-                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Send Reset Link
-                        </Button>
-                    </form>
-                </Form>
+                {notRegistered ? (
+                    <div className="rounded-md bg-destructive/15 p-4 text-sm text-destructive">
+                        <p className="font-medium">Email not registered</p>
+                        <p className="mt-1">
+                            This email address is not associated with any account.{" "}
+                            <Link href="/auth/signup" className="underline hover:text-destructive/80">
+                                Register here
+                            </Link>
+                        </p>
+                    </div>
+                ) : (
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Email</FormLabel>
+                                        <FormControl>
+                                            <div className="relative">
+                                                <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                                <Input placeholder="name@example.com" className="pl-9" {...field} />
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <Button className="w-full" type="submit" disabled={isLoading}>
+                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Send Reset Link
+                            </Button>
+                        </form>
+                    </Form>
+                )}
             </CardContent>
             <CardFooter className="flex justify-center">
                 <Link href="/auth/signin" className="text-sm text-muted-foreground hover:text-primary hover:underline">

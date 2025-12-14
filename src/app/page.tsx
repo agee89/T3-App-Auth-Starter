@@ -3,7 +3,7 @@ import { getServerAuthSession } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
 export default async function Home() {
-    const session = await getServerAuthSession({ req: {} as any, res: {} as any }); // Mock implementation for now, or use getServerSession directly
+    const session = await getServerAuthSession();
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">

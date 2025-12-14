@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 import { headers } from "next/headers";
 
 import { TRPCReactProvider } from "@/trpc/react";
-import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
+import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({
@@ -27,15 +27,10 @@ export default function RootLayout({
         <html lang="en">
             <body className={`font-sans ${inter.variable}`}>
                 <TRPCReactProvider>
-                    {/* Top progress bar */}
-                    <ProgressBar
-                        height="3px"
-                        color="#000000"
-                        options={{ showSpinner: false }}
-                        shallowRouting
-                    />
-                    <Toaster />
-                    {children}
+                    <Providers>
+                        <Toaster />
+                        {children}
+                    </Providers>
                 </TRPCReactProvider>
             </body>
         </html>

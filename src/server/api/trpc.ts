@@ -23,14 +23,7 @@ interface CreateContextOptions {
  * It is used by the `createTRPCContext` below.
  */
 export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
-    const session = await getServerAuthSession({
-        req: opts.headers as any, // Mocking req/res for getServerSession as it extracts from headers in Next 13+ usually or we use a different approach
-        res: {} as any,
-    } as any).catch(() => null);
-
-    // NOTE: getServerAuthSession above expects req/res from GetServerSidePropsContext (Next.js Pages Router)
-    // But in App Router route handlers, we use `getServerSession(authOptions)`.
-    // I will fix getServerAuthSession usage for App Router below.
+    const session = await getServerAuthSession();
 
     return {
         session,
@@ -46,16 +39,8 @@ export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
  * @see https://trpc.io/docs/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-    // Need to adjust getting session for App Router environment
-    // In App Router, we just call getServerSession(authOptions) directly without req/res often,
-    // or pass headers if needed.
-
-    // Re-importing to avoid circular, but practically we should use a separate file for authOptions if needed.
-    // For now using the improved session retrieval for App Router:
-    const { authOptions } = await import("@/lib/auth");
-    const { getServerSession } = await import("next-auth");
-
-    const session = await getServerSession(authOptions);
+    // Determine session using the helper that works with App Router
+    const session = await getServerAuthSession();
 
     return {
         db,

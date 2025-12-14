@@ -1,8 +1,9 @@
+
 import { z } from "zod";
 import bcrypt from "bcrypt";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
-import { sendVerificationEmail, sendPasswordResetEmail } from "@/lib/email";
+import { sendVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail } from "@/lib/email";
 import { randomBytes } from "crypto";
 
 export const authRouter = createTRPCRouter({
@@ -56,13 +57,27 @@ export const authRouter = createTRPCRouter({
         }),
 
     verifyEmail: publicProcedure
-        .input(z.object({ token: z.string() }))
+        .input(z.object({
+            token: z.string(),
+            email: z.string().email().optional()
+        }))
         .mutation(async ({ ctx, input }) => {
             const verificationToken = await ctx.db.verificationToken.findUnique({
                 where: { token: input.token },
             });
 
             if (!verificationToken) {
+                // If token invalid, check if user is already verified using the optional email param
+                if (input.email) {
+                    const user = await ctx.db.user.findUnique({
+                        where: { email: input.email },
+                    });
+
+                    if (user && user.emailVerified) {
+                        return { success: true, message: "Already verified" };
+                    }
+                }
+
                 throw new TRPCError({
                     code: "NOT_FOUND",
                     message: "Invalid token",
@@ -76,16 +91,34 @@ export const authRouter = createTRPCRouter({
                 });
             }
 
-            await ctx.db.user.update({
+            const updatedUser = await ctx.db.user.update({
                 where: { id: verificationToken.userId },
                 data: { emailVerified: new Date() },
             });
 
-            await ctx.db.verificationToken.delete({
-                where: { identifier_token: { identifier: verificationToken.identifier, token: input.token } },
-            });
+            try {
+                await sendWelcomeEmail(updatedUser.email, updatedUser.name);
+            } catch (error) {
+                console.error("Failed to send welcome email:", error);
+            }
 
-            return { success: true };
+            try {
+                await ctx.db.verificationToken.delete({
+                    where: { identifier_token: { identifier: verificationToken.identifier, token: input.token } },
+                });
+            } catch (error) {
+                // Ignore if already deleted (race condition)
+                console.error("Failed to delete verification token (might be already deleted):", error);
+            }
+
+            // Generate auto-login token
+            // We reuse the JWT secret from next-auth
+            const token = Buffer.from(JSON.stringify({
+                userId: verificationToken.userId,
+                expiredAt: Date.now() + 2 * 60 * 1000 // 2 minutes validity
+            })).toString('base64');
+
+            return { success: true, message: "Email verified", token };
         }),
 
     forgotPassword: publicProcedure
@@ -96,7 +129,29 @@ export const authRouter = createTRPCRouter({
             });
 
             if (!user) {
-                // Return success even if user not found to prevent enumeration
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "User not found",
+                });
+            }
+
+            if (!user.emailVerified) {
+                const token = randomBytes(32).toString("hex");
+                await ctx.db.verificationToken.create({
+                    data: {
+                        identifier: user.email,
+                        token,
+                        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+                        userId: user.id
+                    },
+                });
+
+                try {
+                    await sendVerificationEmail(user.email, token);
+                } catch (error) {
+                    console.error("Failed to send verification email:", error);
+                }
+
                 return { success: true };
             }
 

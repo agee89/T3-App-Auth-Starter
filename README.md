@@ -63,6 +63,8 @@ A comprehensive authentication starter/boilerplate built with the T3 Stack (Next
     - `DATABASE_URL`: Connection string to your PostgreSQL database.
     - `NEXTAUTH_SECRET`: Generate one with `openssl rand -base64 32`.
     - `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: From Google Cloud Console.
+        - **Authorized JavaScript origins**: `http://localhost:3000`
+        - **Authorized redirect URIs**: `http://localhost:3000/api/auth/callback/google`
     - `SMTP_*`: Your email server details.
 
 4.  **Database Setup**
@@ -89,6 +91,17 @@ A comprehensive authentication starter/boilerplate built with the T3 Stack (Next
 - `npm run lint`: Runs ESLint.
 - `npm run db:push`: Pushes the Prisma schema to the database.
 - `npm run db:seed`: Seeds the database.
+- `npm run db:studio`: Opens Prisma Studio to view/edit data.
+
+## 🗄️ Database Management (Prisma Studio)
+
+Anda bisa melihat dan mengelola data di database (User, Session, dll) menggunakan Prisma Studio.
+
+**Cara membuka:**
+```bash
+npm run db:studio
+```
+Dashboard akan terbuka otomatis di browser pada alamat `http://localhost:5555`.
 
 ## 📂 Project Structure
 
@@ -127,7 +140,7 @@ Berikut adalah langkah-langkah untuk mengupload project ini ke GitHub/GitLab:
 2.  **Tambah Remote Repository**
     Buat repository baru di GitHub/GitLab, lalu jalankan:
     ```bash
-    git remote add origin <your-repository-url>
+    git remote add origin https://github.com/agee89/T3-App-Auth-Starter.git
     ```
 
 3.  **Stage & Commit**

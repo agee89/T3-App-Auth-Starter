@@ -1,19 +1,14 @@
-import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { DashboardContent } from "@/components/dashboard-content";
 
-export default async function DashboardPage() {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-        redirect("/auth/signin");
-    }
-
+export default function DashboardPage() {
     return (
-        <div className="container mx-auto p-8">
-            <h1 className="mb-8 text-3xl font-bold">Dashboard</h1>
-            <DashboardContent />
-        </div>
+        <>
+            <div className="flex items-center justify-between space-y-2">
+                <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+            </div>
+            <div className="mt-4">
+                <DashboardContent />
+            </div>
+        </>
     );
 }

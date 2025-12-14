@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -7,12 +9,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function DashboardContent() {
     const { data: user, isLoading } = api.user.me.useQuery();
 
-    if (isLoading) {
-        return <DashboardSkeleton />;
-    }
+    const router = useRouter();
 
-    if (!user) {
-        return <div>User not found</div>;
+    useEffect(() => {
+        if (!isLoading && !user) {
+            router.push("/auth/signin");
+        }
+    }, [user, isLoading, router]);
+
+    if (isLoading || !user) {
+        return <DashboardSkeleton />;
     }
 
     return (
