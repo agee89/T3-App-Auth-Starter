@@ -21,14 +21,20 @@ export function Sidebar({ className }: SidebarProps) {
         {
             label: "Customers",
             icon: Users,
-            href: "/dashboard/customers",
-            active: pathname === "/dashboard/customers",
+            href: "/dashboard/",
+            active: pathname === "/dashboard/",
         },
         {
             label: "Products",
             icon: Package,
-            href: "/dashboard/products",
-            active: pathname === "/dashboard/products",
+            href: "/dashboard/",
+            active: pathname === "/dashboard/",
+        },
+        {
+            label: "Examples",
+            icon: Package,
+            href: "/dashboard/examples",
+            active: pathname === "/dashboard/examples",
         },
         {
             label: "Settings",

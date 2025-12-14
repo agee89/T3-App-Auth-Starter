@@ -18,8 +18,11 @@ A comprehensive authentication starter/boilerplate built with the T3 Stack (Next
 - **Database**: Prisma ORM with PostgreSQL.
 - **UI/UX**: 
   - Built with [shadcn/ui](https://ui.shadcn.com/) components.
-  - Responsive Dashboard.
-  - Loading states and skeletons.
+  - Responsive Dashboard with Sidebar.
+  - **Component Examples**: Dedicated page showcasing skeletons, animations, and progress bars.
+  - **Custom 404 Page**: User-friendly "Page Not Found" handling.
+  - Loading states and skeletons (`react-loading-skeleton`).
+  - Smooth Page Transitions (`nextjs-toploader`).
   - Toast notifications.
 - **Email**: Custom email sender using Nodemailer.
 
@@ -145,7 +148,42 @@ src/
 - CSRF protection enabled by default in NextAuth.
 - Rate limiting on API routes is recommended for production.
 
-## � Push ke Git
+## 🛡️ Route Protection
+
+### 1. Protecting Pages (Server Components)
+
+To protect a page or layout, check the session server-side and redirect if null.
+
+```tsx
+import { getServerAuthSession } from "@/server/auth";
+import { redirect } from "next/navigation";
+
+export default async function ProtectedPage() {
+  const session = await getServerAuthSession();
+
+  if (!session) {
+    redirect("/auth/signin");
+  }
+
+  return <div>Protected Content</div>;
+}
+```
+
+### 2. Protecting API Routes (tRPC)
+
+Use the `protectedProcedure` middleware in your tRPC routers.
+
+```ts
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+
+export const exampleRouter = createTRPCRouter({
+  getSecretMessage: protectedProcedure.query(() => {
+    return "This is a protected message!";
+  }),
+});
+```
+
+## 🚀 Push ke Git
 
 Berikut adalah langkah-langkah untuk mengupload project ini ke GitHub/GitLab:
 
