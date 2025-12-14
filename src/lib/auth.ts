@@ -9,7 +9,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { db } from "@/server/db";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendWelcomeEmail } from "@/lib/email-sender";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`

@@ -3,7 +3,7 @@ import { z } from "zod";
 import bcrypt from "bcrypt";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
-import { sendVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail } from "@/lib/email";
+import { sendVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail } from "@/lib/email-sender";
 import { randomBytes } from "crypto";
 
 export const authRouter = createTRPCRouter({
