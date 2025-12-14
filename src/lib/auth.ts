@@ -101,47 +101,89 @@ export const authOptions: NextAuthOptions = {
     },
     adapter: PrismaAdapter(db),
     providers: [
-        GoogleProvider({
-            allowDangerousEmailAccountLinking: true,
-            clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-            profile(profile) {
-                return {
-                    id: profile.sub,
-                    name: profile.name,
-                    email: profile.email,
-                    image: profile.picture,
-                    // If Google says email is verified, set the date immediately
-                    emailVerified: profile.email_verified ? new Date() : null,
-                };
-            },
-        }),
-        CredentialsProvider({
-            id: "token-login",
-            name: "Token Login",
-            credentials: {
-                token: { label: "Token", type: "text" }
-            },
-            async authorize(credentials) {
-                if (!credentials?.token) {
-                    return null;
+        ...(process.env.ENABLE_GOOGLE_AUTH !== "false" ? [
+            GoogleProvider({
+                allowDangerousEmailAccountLinking: true,
+                clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+                clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+                profile(profile) {
+                    return {
+                        id: profile.sub,
+                        name: profile.name,
+                        email: profile.email,
+                        image: profile.picture,
+                        // If Google says email is verified, set the date immediately
+                        emailVerified: profile.email_verified ? new Date() : null,
+                    };
+                },
+            })
+        ] : []),
+        ...(process.env.ENABLE_EMAIL_AUTH !== "false" ? [
+            CredentialsProvider({
+                id: "token-login",
+                name: "Token Login",
+                credentials: {
+                    token: { label: "Token", type: "text" }
+                },
+                async authorize(credentials) {
+                    if (!credentials?.token) {
+                        return null;
+                    }
+
+                    try {
+                        // We'll trust the token we generated in the verifyEmail procedure
+                        // In a real app, you might want to verify signature or database lookup
+                        // For now, we assume the token IS the userId structure we encoded
+                        const decoded = JSON.parse(Buffer.from(credentials.token, 'base64').toString());
+
+                        if (decoded.expiredAt < Date.now()) {
+                            return null;
+                        }
+
+                        const user = await db.user.findUnique({
+                            where: { id: decoded.userId }
+                        });
+
+                        if (!user) return null;
+
+                        return {
+                            id: user.id,
+                            name: user.name,
+                            email: user.email,
+                            image: user.image,
+                        };
+                    } catch (e) {
+                        return null;
+                    }
                 }
-
-                try {
-                    // We'll trust the token we generated in the verifyEmail procedure
-                    // In a real app, you might want to verify signature or database lookup
-                    // For now, we assume the token IS the userId structure we encoded
-                    const decoded = JSON.parse(Buffer.from(credentials.token, 'base64').toString());
-
-                    if (decoded.expiredAt < Date.now()) {
+            }),
+            CredentialsProvider({
+                name: "Credentials",
+                credentials: {
+                    email: { label: "Email", type: "email" },
+                    password: { label: "Password", type: "password" }
+                },
+                async authorize(credentials) {
+                    if (!credentials?.email || !credentials?.password) {
                         return null;
                     }
 
                     const user = await db.user.findUnique({
-                        where: { id: decoded.userId }
+                        where: { email: credentials.email }
                     });
 
-                    if (!user) return null;
+                    if (!user || !user.password) {
+                        return null;
+                    }
+
+                    const isPasswordValid = await bcrypt.compare(
+                        credentials.password,
+                        user.password
+                    );
+
+                    if (!isPasswordValid) {
+                        return null;
+                    }
 
                     return {
                         id: user.id,
@@ -149,47 +191,9 @@ export const authOptions: NextAuthOptions = {
                         email: user.email,
                         image: user.image,
                     };
-                } catch (e) {
-                    return null;
                 }
-            }
-        }),
-        CredentialsProvider({
-            name: "Credentials",
-            credentials: {
-                email: { label: "Email", type: "email" },
-                password: { label: "Password", type: "password" }
-            },
-            async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) {
-                    return null;
-                }
-
-                const user = await db.user.findUnique({
-                    where: { email: credentials.email }
-                });
-
-                if (!user || !user.password) {
-                    return null;
-                }
-
-                const isPasswordValid = await bcrypt.compare(
-                    credentials.password,
-                    user.password
-                );
-
-                if (!isPasswordValid) {
-                    return null;
-                }
-
-                return {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    image: user.image,
-                };
-            }
-        })
+            })
+        ] : [])
     ],
     pages: {
         signIn: "/auth/signin",

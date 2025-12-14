@@ -5,11 +5,15 @@ A comprehensive authentication starter/boilerplate built with the T3 Stack (Next
 ## 🚀 Features
 
 - **Authentication**:
-  - Google OAuth Login
+  - Google OAuth Login (with account linking)
   - Email/Password Registration
-  - Email Verification
+  - Email Verification (with Auto-Login)
   - Forgot & Reset Password flows
   - Protected Routes & Middleware
+  - **Configurable Auth**: Enable/disable Google or Email providers via environment variables.
+- **Email**: 
+   - Welcome Emails upon verification
+   - Custom branding with React Email
 - **Type Safety**: End-to-end type safety with tRPC and Zod.
 - **Database**: Prisma ORM with PostgreSQL.
 - **UI/UX**: 
@@ -66,6 +70,9 @@ A comprehensive authentication starter/boilerplate built with the T3 Stack (Next
         - **Authorized JavaScript origins**: `http://localhost:3000`
         - **Authorized redirect URIs**: `http://localhost:3000/api/auth/callback/google`
     - `SMTP_*`: Your email server details.
+    - `SENDER_NAME` (Optional): Custom name for email sender (e.g., "My App Team").
+    - `ENABLE_GOOGLE_AUTH` (Optional): Set to "false" to disable Google Login/Register (default: "true").
+    - `ENABLE_EMAIL_AUTH` (Optional): Set to "false" to disable Email Login/Register (default: "true").
 
 4.  **Database Setup**
     Push the schema to your database:
