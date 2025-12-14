@@ -74,6 +74,16 @@ A comprehensive authentication starter/boilerplate built with the T3 Stack (Next
     - `ENABLE_GOOGLE_AUTH` (Optional): Set to "false" to disable Google Login/Register (default: "true").
     - `ENABLE_EMAIL_AUTH` (Optional): Set to "false" to disable Email Login/Register (default: "true").
 
+    **App Configuration:**
+    - `NEXT_PUBLIC_APP_NAME`: Your application name (e.g., "My SaaS").
+    - `NEXT_PUBLIC_APP_URL`: Base URL (e.g., "http://localhost:3000" or "https://myapp.com").
+
+    **Security Configuration (Optional):**
+    - `BCRYPT_SALT_ROUNDS`: Cost factor for password hashing (default: 10).
+    - `EMAIL_VERIFICATION_EXPIRY`: Token validity in seconds (default: 86400 / 24h).
+    - `PASSWORD_RESET_EXPIRY`: Token validity in seconds (default: 3600 / 1h).
+    - `AUTO_LOGIN_EXPIRY`: Auto-login token validity in seconds (default: 120 / 2m).
+
 4.  **Database Setup**
     Push the schema to your database:
     ```bash

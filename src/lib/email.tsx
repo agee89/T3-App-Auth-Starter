@@ -50,7 +50,7 @@ export const sendWelcomeEmail = async (email: string, name?: string | null) => {
   await transporter.sendMail({
     from: sender,
     to: email,
-    subject: "Welcome to T3 App Auth Starter",
+    subject: `Welcome to ${process.env.NEXT_PUBLIC_APP_NAME ?? "T3 App"}`,
     html: emailHtml,
   });
 };

@@ -19,7 +19,7 @@ interface WelcomeEmailProps {
 export const WelcomeEmail = ({ name }: WelcomeEmailProps) => (
     <Html>
         <Head />
-        <Preview>Welcome to T3 App Auth Starter!</Preview>
+        <Preview>Welcome to {process.env.NEXT_PUBLIC_APP_NAME ?? "T3 App"}!</Preview>
         <Body style={main}>
             <Container style={container}>
                 <Heading style={h1}>Welcome, {name || "there"}!</Heading>

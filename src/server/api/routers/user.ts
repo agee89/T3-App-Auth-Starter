@@ -74,7 +74,7 @@ export const userRouter = createTRPCRouter({
                 });
             }
 
-            const hashedPassword = await bcrypt.hash(input.newPassword, 10);
+            const hashedPassword = await bcrypt.hash(input.newPassword, parseInt(process.env.BCRYPT_SALT_ROUNDS || "10"));
 
             await ctx.db.user.update({
                 where: { id: ctx.session.user.id },

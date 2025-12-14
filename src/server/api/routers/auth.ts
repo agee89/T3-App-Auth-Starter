@@ -25,7 +25,7 @@ export const authRouter = createTRPCRouter({
                 });
             }
 
-            const hashedPassword = await bcrypt.hash(input.password, 10);
+            const hashedPassword = await bcrypt.hash(input.password, parseInt(process.env.BCRYPT_SALT_ROUNDS || "10"));
 
             const user = await ctx.db.user.create({
                 data: {
@@ -41,7 +41,7 @@ export const authRouter = createTRPCRouter({
                 data: {
                     identifier: user.email,
                     token,
-                    expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+                    expires: new Date(Date.now() + (parseInt(process.env.EMAIL_VERIFICATION_EXPIRY || "86400") * 1000)), // Default 24 hours
                     userId: user.id
                 },
             });
@@ -115,7 +115,7 @@ export const authRouter = createTRPCRouter({
             // We reuse the JWT secret from next-auth
             const token = Buffer.from(JSON.stringify({
                 userId: verificationToken.userId,
-                expiredAt: Date.now() + 2 * 60 * 1000 // 2 minutes validity
+                expiredAt: Date.now() + (parseInt(process.env.AUTO_LOGIN_EXPIRY || "120") * 1000) // Default 2 minutes
             })).toString('base64');
 
             return { success: true, message: "Email verified", token };
@@ -141,7 +141,7 @@ export const authRouter = createTRPCRouter({
                     data: {
                         identifier: user.email,
                         token,
-                        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+                        expires: new Date(Date.now() + (parseInt(process.env.EMAIL_VERIFICATION_EXPIRY || "86400") * 1000)), // Default 24 hours
                         userId: user.id
                     },
                 });
@@ -156,7 +156,7 @@ export const authRouter = createTRPCRouter({
             }
 
             const token = randomBytes(32).toString("hex");
-            const expires = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
+            const expires = new Date(Date.now() + (parseInt(process.env.PASSWORD_RESET_EXPIRY || "3600") * 1000)); // Default 1 hour
 
             await ctx.db.passwordResetToken.create({
                 data: {
@@ -200,7 +200,7 @@ export const authRouter = createTRPCRouter({
                 });
             }
 
-            const hashedPassword = await bcrypt.hash(input.password, 10);
+            const hashedPassword = await bcrypt.hash(input.password, parseInt(process.env.BCRYPT_SALT_ROUNDS || "10"));
 
             await ctx.db.user.update({
                 where: { id: resetToken.userId },

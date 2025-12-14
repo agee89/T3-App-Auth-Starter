@@ -19,12 +19,12 @@ interface ResetPasswordEmailProps {
 export const ResetPasswordEmail = ({ resetUrl }: ResetPasswordEmailProps) => (
     <Html>
         <Head />
-        <Preview>Reset your password for T3 App Auth Starter</Preview>
+        <Preview>Reset your password for {process.env.NEXT_PUBLIC_APP_NAME ?? "T3 App"}</Preview>
         <Body style={main}>
             <Container style={container}>
                 <Heading style={h1}>Reset your password</Heading>
                 <Text style={text}>
-                    We received a request to reset the password for your T3 App Auth Starter
+                    We received a request to reset the password for your {process.env.NEXT_PUBLIC_APP_NAME ?? "T3 App"}
                     account. If you made this request, click the button below to reset your
                     password.
                 </Text>

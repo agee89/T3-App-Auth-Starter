@@ -13,9 +13,10 @@ const inter = Inter({
 });
 
 export const metadata = {
-    title: "T3 App Auth Starter",
+    title: process.env.NEXT_PUBLIC_APP_NAME ?? "T3 App Auth Starter",
     description: "Authentication starter with T3 Stack",
     icons: [{ rel: "icon", url: "/favicon.ico" }],
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
 };
 
 export default function RootLayout({

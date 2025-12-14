@@ -19,12 +19,12 @@ interface VerifyEmailProps {
 export const VerifyEmail = ({ verificationUrl }: VerifyEmailProps) => (
     <Html>
         <Head />
-        <Preview>Verify your email address for T3 App Auth Starter</Preview>
+        <Preview>Verify your email address for {process.env.NEXT_PUBLIC_APP_NAME ?? "T3 App"}</Preview>
         <Body style={main}>
             <Container style={container}>
                 <Heading style={h1}>Verify your email address</Heading>
                 <Text style={text}>
-                    Thanks for starting the new T3 App Auth Starter account creation process. We
+                    Thanks for starting the new {process.env.NEXT_PUBLIC_APP_NAME ?? "T3 App"} account creation process. We
                     want to make sure it's really you. Please click the button below to
                     verify your email address.
                 </Text>
